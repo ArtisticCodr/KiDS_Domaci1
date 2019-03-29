@@ -2,26 +2,19 @@ package cli;
 
 public class CommandManger {
 
-	private String[] keywords = new String[0];
-	private String file_corpus_prefix = new String();
-	private long dir_crawler_sleep_time = 0;
-	private long file_scanning_size_limit = 0;
-	private int hop_count = 0;
-	private long url_refresh_time = 0;
+	SharedObjCollection sharedColl;
 
-	public CommandManger(String[] keywords, String file_corpus_prefix, long dir_crawler_sleep_time,
-			long file_scanning_size_limit, int hop_count, long url_refresh_time) {
-		this.keywords = keywords;
-		this.file_corpus_prefix = file_corpus_prefix;
-		this.dir_crawler_sleep_time = dir_crawler_sleep_time;
-		this.file_scanning_size_limit = file_scanning_size_limit;
-		this.hop_count = hop_count;
-		this.url_refresh_time = url_refresh_time;
+	public CommandManger(SharedObjCollection sharedColl) {
+		this.sharedColl = sharedColl;
 	}
 
 	public void ad(String line) {
 		try {
 			line = line.substring(3);
+			
+			sharedColl.DirectoryCrawler_Lock.lock();
+			sharedColl.directories.add(line);
+			sharedColl.DirectoryCrawler_Lock.unlock();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

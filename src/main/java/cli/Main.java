@@ -3,6 +3,8 @@ package cli;
 import java.io.File;
 import java.util.Scanner;
 
+import directory_crawler.DirectoryCrawler;
+
 public class Main {
 
 	static String[] keywords = new String[0];
@@ -11,15 +13,26 @@ public class Main {
 	static long file_scanning_size_limit = 0;
 	static int hop_count = 0;
 	static long url_refresh_time = 0;
+	static SharedObjCollection sharedColl;
 
 	public static void main(String[] args) {
+		// reading config file
 		readConfig();
+
+		// init shared objects
+		sharedColl = new SharedObjCollection(keywords, file_corpus_prefix, dir_crawler_sleep_time,
+				file_scanning_size_limit, hop_count, url_refresh_time);
+
+		// starting threads
+		new Thread(new DirectoryCrawler(sharedColl)).start();
+
+		// scanning user commands
 		scanCommands();
 	}
 
 	public static void scanCommands() {
-		CommandManger cm = new CommandManger(keywords, file_corpus_prefix, dir_crawler_sleep_time,
-				file_scanning_size_limit, hop_count, url_refresh_time);
+		CommandManger cm = new CommandManger(sharedColl);
+		System.out.println("Enter Command:");
 		Scanner sc = new Scanner(System.in);
 		while (true) {
 			String line = sc.nextLine();
@@ -55,6 +68,7 @@ public class Main {
 
 			System.err.println("Nepostojeca komanda sa datim brojem argumenata");
 		}
+		sc.close();
 	}
 
 	public static void readConfig() {
