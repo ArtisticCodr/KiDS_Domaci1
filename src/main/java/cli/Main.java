@@ -1,7 +1,6 @@
 package cli;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -15,7 +14,47 @@ public class Main {
 
 	public static void main(String[] args) {
 		readConfig();
+		scanCommands();
+	}
 
+	public static void scanCommands() {
+		CommandManger cm = new CommandManger(keywords, file_corpus_prefix, dir_crawler_sleep_time,
+				file_scanning_size_limit, hop_count, url_refresh_time);
+		Scanner sc = new Scanner(System.in);
+		while (true) {
+			String line = sc.nextLine();
+
+			if (line.startsWith("ad ")) {
+				cm.ad(line);
+				continue;
+			}
+			if (line.startsWith("aw ")) {
+				cm.aw(line);
+				continue;
+			}
+			if (line.startsWith("get ")) {
+				cm.get(line);
+				continue;
+			}
+			if (line.startsWith("query ")) {
+				cm.query(line);
+				continue;
+			}
+			if (line.equals("cws")) {
+				cm.cws();
+				continue;
+			}
+			if (line.equals("cfs")) {
+				cm.cws();
+				continue;
+			}
+			if (line.equals("stop")) {
+				cm.stop();
+				break;
+			}
+
+			System.err.println("Nepostojeca komanda sa datim brojem argumenata");
+		}
 	}
 
 	public static void readConfig() {
