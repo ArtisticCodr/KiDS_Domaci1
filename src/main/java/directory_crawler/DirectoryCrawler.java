@@ -1,5 +1,6 @@
 package directory_crawler;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,8 +46,29 @@ public class DirectoryCrawler implements Runnable {
 
 	}
 
-	private void searchDirectory(String directory) {
-		System.out.println("crawling " + directory);
+	private void searchDirectory(String directoryName) {
+		File directory = new File(directoryName);
+
+		if (directory.getName().startsWith(file_corpus_prefix)) {
+			createJob(directory.getAbsolutePath());
+			return;
+		}
+
+		File[] fList = directory.listFiles();
+		if (fList != null)
+			for (File file : fList) {
+				if (file.isDirectory()) {
+					if (file.getName().startsWith(file_corpus_prefix)) {
+						createJob(file.getAbsolutePath());
+					} else {
+						searchDirectory(file.getAbsolutePath());
+					}
+				}
+			}
+	}
+
+	private void createJob(String directory) {
+		System.out.println("creating job for: " + directory);
 	}
 
 }
