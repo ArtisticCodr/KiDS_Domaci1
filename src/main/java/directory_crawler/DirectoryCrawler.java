@@ -2,6 +2,7 @@ package directory_crawler;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import cli.SharedObjCollection;
@@ -50,7 +51,7 @@ public class DirectoryCrawler implements Runnable {
 		File directory = new File(directoryName);
 
 		if (directory.getName().startsWith(file_corpus_prefix)) {
-			createJob(directory.getAbsolutePath());
+			createJob(directory);
 			return;
 		}
 
@@ -59,7 +60,7 @@ public class DirectoryCrawler implements Runnable {
 			for (File file : fList) {
 				if (file.isDirectory()) {
 					if (file.getName().startsWith(file_corpus_prefix)) {
-						createJob(file.getAbsolutePath());
+						createJob(file);
 					} else {
 						searchDirectory(file.getAbsolutePath());
 					}
@@ -67,8 +68,21 @@ public class DirectoryCrawler implements Runnable {
 			}
 	}
 
-	private void createJob(String directory) {
-		System.out.println("creating job for: " + directory);
+	// direktoriumi za koje smo vec napravili Job.. key->path ; value->last_modified
+	private HashMap<String, Long> corpus_directories = new HashMap<String, Long>();
+
+	private void createJob(File dirFile) {
+		// proveravamo dal se promenio timestamp
+		if (corpus_directories.containsKey(dirFile.getAbsolutePath())) {
+			if (corpus_directories.get(dirFile.getAbsolutePath()) == dirFile.lastModified()) {
+				return;
+			}
+		}
+
+		System.out.println("creating job for: " + dirFile.getAbsolutePath());
+
+		// ubacujemo directory sa last modifeied podatkom
+		corpus_directories.put(dirFile.getAbsolutePath(), dirFile.lastModified());
 	}
 
 }
