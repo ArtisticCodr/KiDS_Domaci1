@@ -1,6 +1,6 @@
 package cli;
 
-import directory_crawler.DirectoriesList;
+import threadSafeObj.ThreadSafeList;
 
 public class SharedObjCollection {
 
@@ -23,6 +23,6 @@ public class SharedObjCollection {
 	}
 
 	// shared obj
-	public DirectoriesList directoiesList = new DirectoriesList();
+	public ThreadSafeList<String> directoriesList = new ThreadSafeList<String>();
 
 }

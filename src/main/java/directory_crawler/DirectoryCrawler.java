@@ -6,17 +6,18 @@ import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import cli.SharedObjCollection;
+import threadSafeObj.ThreadSafeList;
 
 public class DirectoryCrawler implements Runnable {
 
 	private String file_corpus_prefix;
 	private long dir_crawler_sleep_time;
-	private DirectoriesList directoriesList;
+	private ThreadSafeList<String> directoriesList;
 
 	public DirectoryCrawler(SharedObjCollection sharedColl) {
 		this.file_corpus_prefix = sharedColl.file_corpus_prefix;
 		this.dir_crawler_sleep_time = sharedColl.dir_crawler_sleep_time;
-		this.directoriesList = sharedColl.directoiesList;
+		this.directoriesList = sharedColl.directoriesList;
 	}
 
 	@Override

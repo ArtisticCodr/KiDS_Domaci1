@@ -11,7 +11,7 @@ public class CommandManger {
 	public void ad(String line) {
 		try {
 			line = line.substring(3);
-			sharedColl.directoiesList.add(line);
+			sharedColl.directoriesList.add(line);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
