@@ -1,7 +1,6 @@
 package cli;
 
-import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
+import directory_crawler.DirectoriesList;
 
 public class SharedObjCollection {
 
@@ -23,10 +22,7 @@ public class SharedObjCollection {
 		this.url_refresh_time = url_refresh_time;
 	}
 
-	// locks
-	public ReentrantLock DirectoryCrawler_Lock = new ReentrantLock();
-
-	// obj
-	public ArrayList<String> directories = new ArrayList<String>();
+	// shared obj
+	public DirectoriesList directoiesList = new DirectoriesList();
 
 }

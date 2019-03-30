@@ -11,10 +11,7 @@ public class CommandManger {
 	public void ad(String line) {
 		try {
 			line = line.substring(3);
-			
-			sharedColl.DirectoryCrawler_Lock.lock();
-			sharedColl.directories.add(line);
-			sharedColl.DirectoryCrawler_Lock.unlock();
+			sharedColl.directoiesList.add(line);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

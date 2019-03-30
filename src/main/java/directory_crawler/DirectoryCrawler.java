@@ -9,33 +9,24 @@ import cli.SharedObjCollection;
 
 public class DirectoryCrawler implements Runnable {
 
-	private ArrayList<String> directories;
-	private ReentrantLock DirectoryCrawler_Lock;
 	private String file_corpus_prefix;
 	private long dir_crawler_sleep_time;
+	private DirectoriesList directoriesList;
 
 	public DirectoryCrawler(SharedObjCollection sharedColl) {
-		this.directories = sharedColl.directories;
-		this.DirectoryCrawler_Lock = sharedColl.DirectoryCrawler_Lock;
-
 		this.file_corpus_prefix = sharedColl.file_corpus_prefix;
 		this.dir_crawler_sleep_time = sharedColl.dir_crawler_sleep_time;
+		this.directoriesList = sharedColl.directoiesList;
 	}
 
 	@Override
 	public void run() {
 
 		while (true) {
-			DirectoryCrawler_Lock.lock();
-			int size = directories.size();
-			DirectoryCrawler_Lock.unlock();
 
-			for (int i = 0; i < size; i++) {
-				DirectoryCrawler_Lock.lock();
-				String dir = directories.get(i);
-				DirectoryCrawler_Lock.unlock();
-
-				searchDirectory(dir);
+			// prolazimo kroz sve direktoriume koje imamo zadato
+			for (int i = 0; i < directoriesList.size(); i++) {
+				searchDirectory(directoriesList.get(i));
 			}
 
 			try {
@@ -43,6 +34,7 @@ public class DirectoryCrawler implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+
 		}
 
 	}
