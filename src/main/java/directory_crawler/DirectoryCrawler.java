@@ -70,7 +70,9 @@ public class DirectoryCrawler implements Runnable {
 			}
 		}
 
-		System.out.println("creating job for: " + dirFile.getAbsolutePath());
+		System.out.println("<Directory Crawler> creating job for: " + dirFile.getAbsolutePath());
+		// napravi Job
+		// stavi Job u queue
 
 		// ubacujemo directory sa last modifeied podatkom
 		corpus_directories.put(dirFile.getAbsolutePath(), dirFile.lastModified());
