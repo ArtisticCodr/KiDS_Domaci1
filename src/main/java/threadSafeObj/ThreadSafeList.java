@@ -12,8 +12,10 @@ public class ThreadSafeList<E> {
 		lock.lock();
 
 		try {
-			if (!lista.contains(value))
+			if (!lista.contains(value)) {
+				System.out.println("Adding dir " + value);
 				lista.add(value);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
