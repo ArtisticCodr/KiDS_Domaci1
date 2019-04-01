@@ -1,4 +1,4 @@
-package job_queue;
+package job;
 
 public enum ScanType {
 	FILE, WEB;

@@ -1,4 +1,4 @@
-package job_queue;
+package job;
 
 import java.util.Map;
 import java.util.concurrent.Future;

@@ -12,7 +12,20 @@ public class ThreadSafeList<E> {
 		lock.lock();
 
 		try {
-			lista.add(value);
+			if (!lista.contains(value))
+				lista.add(value);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	public void remove(int x) {
+		lock.lock();
+
+		try {
+			lista.remove(x);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -26,7 +39,6 @@ public class ThreadSafeList<E> {
 
 		try {
 
-			lista.get(x);
 			retVal = lista.get(x);
 
 		} catch (Exception e) {

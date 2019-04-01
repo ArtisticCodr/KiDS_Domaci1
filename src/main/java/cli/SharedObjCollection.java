@@ -1,5 +1,9 @@
 package cli;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import job.Job;
 import threadSafeObj.ThreadSafeList;
 
 public class SharedObjCollection {
@@ -24,5 +28,6 @@ public class SharedObjCollection {
 
 	// shared obj
 	public ThreadSafeList<String> directoriesList = new ThreadSafeList<String>();
+	public BlockingQueue<Job> jobQueue = new LinkedBlockingQueue<Job>();
 
 }
