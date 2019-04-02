@@ -1,5 +1,8 @@
 package cli;
 
+import job.Job;
+import job.ScanType;
+
 public class CommandManger {
 
 	SharedObjCollection sharedColl;
@@ -20,6 +23,11 @@ public class CommandManger {
 	public void aw(String line) {
 		try {
 			line = line.substring(3);
+
+			// ubacuje novi job u JobQueue
+			Job job = new Job(ScanType.WEB, line);
+			sharedColl.jobQueue.put(job);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
