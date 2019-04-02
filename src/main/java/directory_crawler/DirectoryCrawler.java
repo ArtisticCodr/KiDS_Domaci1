@@ -81,7 +81,7 @@ public class DirectoryCrawler implements Runnable {
 		Job job = new Job(ScanType.FILE, dirFile.getAbsolutePath());
 		// stavi Job u queue
 		try {
-			jobQueue.add(job);
+			jobQueue.put(job);
 		} catch (Exception e) {
 			System.err.println("<DirectoryCrawler> Error: Cant put File job in jobQueue");
 			return;
