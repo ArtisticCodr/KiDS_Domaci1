@@ -9,6 +9,6 @@ public interface ScanningJob {
 
 	String getQuery();
 
-	Future<Map<String, Integer>> initaiate();
+	Future<Map<String, Integer>> initiate();
 
 }

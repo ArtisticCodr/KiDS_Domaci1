@@ -25,7 +25,7 @@ public class Job implements ScanningJob {
 	}
 
 	@Override
-	public Future<Map<String, Integer>> initaiate() {
+	public Future<Map<String, Integer>> initiate() {
 		// TODO Auto-generated method stub
 		return null;
 	}

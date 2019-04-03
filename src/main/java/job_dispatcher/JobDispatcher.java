@@ -12,8 +12,8 @@ public class JobDispatcher implements Runnable {
 
 	public JobDispatcher(SharedObjCollection sharedColl) {
 		this.jobQueue = sharedColl.jobQueue;
-		// web scanner thread pool
-		// file scanner thread pool
+		// web scanner thread pool ?
+		// file scanner thread pool ?
 	}
 
 	@Override
@@ -21,6 +21,7 @@ public class JobDispatcher implements Runnable {
 		while (true) {
 			try {
 				Job job = jobQueue.take();
+				// ovde vrv ide samo job.initiate();
 				if (job.getType().equals(ScanType.WEB)) {
 					System.out.println("dispatching WEB job: " + job.getQuery());
 				} else {

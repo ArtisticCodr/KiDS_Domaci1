@@ -1,6 +1,12 @@
 package cli;
 
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import job.Job;
@@ -30,4 +36,10 @@ public class SharedObjCollection {
 	public ThreadSafeList<String> directoriesList = new ThreadSafeList<String>();
 	public BlockingQueue<Job> jobQueue = new LinkedBlockingQueue<Job>();
 
+	// File scanner thread pool
+	public ForkJoinPool pool = new ForkJoinPool();
+
+	// Web scanner thread pool
+	public ExecutorService threadPool = Executors.newCachedThreadPool();
+	public CompletionService<Map<String, Integer>> service = new ExecutorCompletionService<>(threadPool);
 }
