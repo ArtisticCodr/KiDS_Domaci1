@@ -37,7 +37,7 @@ public class SharedObjCollection {
 	public BlockingQueue<Job> jobQueue = new LinkedBlockingQueue<Job>();
 
 	// File scanner thread pool
-	public ForkJoinPool pool = new ForkJoinPool();
+	public ForkJoinPool fileScannerPool = new ForkJoinPool();
 
 	// Web scanner thread pool
 	public ExecutorService threadPool = Executors.newCachedThreadPool();

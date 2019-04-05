@@ -15,12 +15,14 @@ public class DirectoryCrawler implements Runnable {
 	private long dir_crawler_sleep_time;
 	private ThreadSafeList<String> directoriesList;
 	private BlockingQueue<Job> jobQueue;
+	private SharedObjCollection sharedColl;
 
 	public DirectoryCrawler(SharedObjCollection sharedColl) {
 		this.file_corpus_prefix = sharedColl.file_corpus_prefix;
 		this.dir_crawler_sleep_time = sharedColl.dir_crawler_sleep_time;
 		this.directoriesList = sharedColl.directoriesList;
 		this.jobQueue = sharedColl.jobQueue;
+		this.sharedColl = sharedColl;
 	}
 
 	@Override
@@ -78,7 +80,7 @@ public class DirectoryCrawler implements Runnable {
 
 		System.out.println("Starting file scan for file|" + dirFile.getName());
 		// napravi Job
-		Job job = new Job(ScanType.FILE, dirFile.getAbsolutePath());
+		Job job = new Job(ScanType.FILE, dirFile.getAbsolutePath(), sharedColl);
 		// stavi Job u queue
 		try {
 			jobQueue.put(job);
