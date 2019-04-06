@@ -2,8 +2,6 @@ package file_scanner;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
