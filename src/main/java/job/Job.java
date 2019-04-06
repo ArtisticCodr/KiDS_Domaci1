@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 
 import cli.SharedObjCollection;
 import file_scanner.FileScanner;
+import web_scanner.WebScanner;
 
 public class Job implements ScanningJob {
 
@@ -34,23 +35,28 @@ public class Job implements ScanningJob {
 
 	@Override
 	public Future<Map<String, Integer>> initiate() {
+		Future<Map<String, Integer>> result;
 
 		if (this.scanType.equals(ScanType.FILE)) {
-			Future<Map<String, Integer>> result = sharedColl.fileScannerPool
-					.submit(new FileScanner(this.query, sharedColl.file_scanning_size_limit, sharedColl.keywords));
-
-			try {
-				Map<String, Integer> res = result.get();
-				System.out.println(res);
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
+			result = sharedColl.submitToFileScannerPool(
+					new FileScanner(this.query, sharedColl.getFile_scanning_size_limit(), sharedColl.getKeywords()));
 
 		} else {
-			// ovde stavljamo u pool za WEB
+			result = sharedColl.submitToWebScannerService(
+					new WebScanner(sharedColl.getHop_count(), getQuery(), sharedColl.jobQueue));
 		}
 
-		return null;
+		// brisi----------------------------------------------------
+		try {
+			Map<String, Integer> numbers = result.get();
+
+			System.out.println(numbers);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		// ---------------------------------------------------------
+
+		return result;
 	}
 
 }

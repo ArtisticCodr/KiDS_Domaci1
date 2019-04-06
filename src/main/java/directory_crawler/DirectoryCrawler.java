@@ -18,8 +18,8 @@ public class DirectoryCrawler implements Runnable {
 	private SharedObjCollection sharedColl;
 
 	public DirectoryCrawler(SharedObjCollection sharedColl) {
-		this.file_corpus_prefix = sharedColl.file_corpus_prefix;
-		this.dir_crawler_sleep_time = sharedColl.dir_crawler_sleep_time;
+		this.file_corpus_prefix = sharedColl.getFile_corpus_prefix();
+		this.dir_crawler_sleep_time = sharedColl.getDir_crawler_sleep_time();
 		this.directoriesList = sharedColl.directoriesList;
 		this.jobQueue = sharedColl.jobQueue;
 		this.sharedColl = sharedColl;

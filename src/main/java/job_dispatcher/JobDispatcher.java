@@ -3,15 +3,19 @@ package job_dispatcher;
 import java.util.concurrent.BlockingQueue;
 
 import cli.SharedObjCollection;
+import file_scanner.FileScanner;
 import job.Job;
 import job.ScanType;
+import web_scanner.WebScanner;
 
 public class JobDispatcher implements Runnable {
 
 	private BlockingQueue<Job> jobQueue;
+	private SharedObjCollection sharedColl;
 
 	public JobDispatcher(SharedObjCollection sharedColl) {
 		this.jobQueue = sharedColl.jobQueue;
+		this.sharedColl = sharedColl;
 	}
 
 	@Override
@@ -19,7 +23,12 @@ public class JobDispatcher implements Runnable {
 		while (true) {
 			try {
 				Job job = jobQueue.take();
-				job.initiate();
+				if (job.getType().equals(ScanType.FILE)) {
+					sharedColl.submitToFileScannerPool(new FileScanner(job));
+
+				} else {
+					sharedColl.submitToWebScannerService(new WebScanner(job));
+				}
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();

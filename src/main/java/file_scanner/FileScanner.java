@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
 
+import job.Job;
 import threadSafeObj.ThreadSafeList;
 
 public class FileScanner extends RecursiveTask<Map<String, Integer>> {
@@ -25,6 +27,14 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	private Stack<Stack<File>> work;
 	private ThreadSafeList<String> keywords;
 
+	private Job job = null;
+
+	// konstruktor za inicializacuju Job-a
+	public FileScanner(Job job) {
+		this.job = job;
+	}
+
+	// konstructor za podelu posla
 	public FileScanner(String directoyPath, long limit, String[] keywords) {
 		this.directoyPath = directoyPath;
 		this.limit = limit;
@@ -32,6 +42,7 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 		this.managed = false;
 	}
 
+	// konstruktor za pokretanje posla
 	public FileScanner(Stack<Stack<File>> work, ThreadSafeList<String> keywords) {
 		this.work = work;
 		this.keywords = keywords;
@@ -40,6 +51,13 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 
 	@Override
 	protected Map<String, Integer> compute() {
+		if (job != null) {
+			Future<Map<String, Integer>> result = job.initiate();
+
+			// stavljas result u result retriever
+			return null;
+		}
+
 		Map<String, Integer> toReturn = new HashMap<String, Integer>();
 
 		if (managed == false) {
