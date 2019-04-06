@@ -41,20 +41,20 @@ public class Job implements ScanningJob {
 			result = sharedColl.submitToFileScannerPool(
 					new FileScanner(this.query, sharedColl.getFile_scanning_size_limit(), sharedColl.getKeywords()));
 
+			// brisi----------------------------------------------------
+			try {
+				Map<String, Integer> numbers = result.get();
+
+				System.out.println(numbers);
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+			// ---------------------------------------------------------
+
 		} else {
 			result = sharedColl.submitToWebScannerService(
-					new WebScanner(sharedColl.getHop_count(), getQuery(), sharedColl.jobQueue));
+					new WebScanner(sharedColl.getHop_count(), this.query, sharedColl.jobQueue));
 		}
-
-		// brisi----------------------------------------------------
-		try {
-			Map<String, Integer> numbers = result.get();
-
-			System.out.println(numbers);
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		// ---------------------------------------------------------
 
 		return result;
 	}

@@ -36,9 +36,8 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 			// stavljas result u result retriever
 			return null;
 		}
-		
-		
 
+		//System.out.println("obradjujem lik " + url);
 		return null;
 	}
 }
