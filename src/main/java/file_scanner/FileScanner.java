@@ -14,6 +14,8 @@ import java.util.Stack;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
+import threadSafeObj.ThreadSafeList;
+
 public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 
 	private static final long serialVersionUID = -1031759288181723247L;
@@ -23,16 +25,16 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	private boolean managed;
 	private Stack<File> files;
 	private Stack<Stack<File>> work;
-	private ArrayList<String> keywords;
+	private ThreadSafeList<String> keywords;
 
 	public FileScanner(String directoyPath, long limit, String[] keywords) {
 		this.directoyPath = directoyPath;
 		this.limit = limit;
-		this.keywords = new ArrayList<String>(Arrays.asList(keywords));
+		this.keywords = new ThreadSafeList<String>(Arrays.asList(keywords));
 		this.managed = false;
 	}
 
-	public FileScanner(Stack<Stack<File>> work, ArrayList<String> keywords) {
+	public FileScanner(Stack<Stack<File>> work, ThreadSafeList<String> keywords) {
 		this.work = work;
 		this.keywords = keywords;
 		this.managed = true;
@@ -79,8 +81,8 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 
 	private Map<String, Integer> countKeywords(List<File> files) {
 		Map<String, Integer> returnMap = new HashMap<String, Integer>();
-		for (String key : keywords) {
-			returnMap.put(key, 0);
+		for (int i = 0; i < keywords.size(); i++) {
+			returnMap.put(keywords.get(i), 0);
 		}
 		for (File file : files) {
 			try (Scanner sc = new Scanner(new FileInputStream(file))) {

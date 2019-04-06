@@ -39,6 +39,13 @@ public class Job implements ScanningJob {
 			Future<Map<String, Integer>> result = sharedColl.fileScannerPool
 					.submit(new FileScanner(this.query, sharedColl.file_scanning_size_limit, sharedColl.keywords));
 
+			try {
+				Map<String, Integer> res = result.get();
+				System.out.println(res);
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+
 		} else {
 			// ovde stavljamo u pool za WEB
 		}

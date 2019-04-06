@@ -1,12 +1,21 @@
 package threadSafeObj;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ThreadSafeList<E> {
-	private final ArrayList<E> lista = new ArrayList<E>();;
+	private List<E> lista;
 	private final Lock lock = new ReentrantLock();
+
+	public ThreadSafeList() {
+		this.lista = new ArrayList<E>();
+	}
+
+	public ThreadSafeList(List<E> lista) {
+		this.lista = lista;
+	}
 
 	public void add(E value) {
 		lock.lock();
@@ -45,6 +54,23 @@ public class ThreadSafeList<E> {
 
 		} catch (Exception e) {
 			System.err.println("ThreadSafeList: Nemoguce je pristupiti objektu pod indexom " + x);
+		} finally {
+			lock.unlock();
+		}
+
+		return retVal;
+	}
+
+	public boolean contains(E value) {
+		lock.lock();
+		boolean retVal = false;
+
+		try {
+
+			retVal = lista.contains(value);
+
+		} catch (Exception e) {
+			System.err.println("ThreadSafeList: Nemoguce je pristupiti objektu " + value);
 		} finally {
 			lock.unlock();
 		}
