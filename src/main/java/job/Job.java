@@ -1,6 +1,8 @@
 package job;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
@@ -36,6 +38,7 @@ public class Job implements ScanningJob {
 		if (this.scanType.equals(ScanType.FILE)) {
 			Future<Map<String, Integer>> result = sharedColl.fileScannerPool
 					.submit(new FileScanner(this.query, sharedColl.file_scanning_size_limit, sharedColl.keywords));
+
 		} else {
 			// ovde stavljamo u pool za WEB
 		}
