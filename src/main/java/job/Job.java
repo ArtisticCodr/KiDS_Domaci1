@@ -15,12 +15,21 @@ public class Job implements ScanningJob {
 	private ScanType scanType;
 	private String query;
 	private SharedObjCollection sharedColl;
+	private int hopCount;
 
 	public Job(ScanType scanType, String query, SharedObjCollection sharedColl) {
 		super();
 		this.scanType = scanType;
 		this.query = query;
 		this.sharedColl = sharedColl;
+	}
+
+	public Job(ScanType scanType, String query, SharedObjCollection sharedColl, int hopCount) {
+		super();
+		this.scanType = scanType;
+		this.query = query;
+		this.sharedColl = sharedColl;
+		this.hopCount = hopCount;
 	}
 
 	@Override
@@ -40,21 +49,20 @@ public class Job implements ScanningJob {
 		if (this.scanType.equals(ScanType.FILE)) {
 			result = sharedColl.submitToFileScannerPool(
 					new FileScanner(this.query, sharedColl.getFile_scanning_size_limit(), sharedColl.getKeywords()));
-
-			// brisi----------------------------------------------------
-			try {
-				Map<String, Integer> numbers = result.get();
-
-				System.out.println(numbers);
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-			// ---------------------------------------------------------
-
 		} else {
-			result = sharedColl.submitToWebScannerService(
-					new WebScanner(sharedColl.getHop_count(), this.query, sharedColl.jobQueue));
+			result = sharedColl.submitToWebScannerService(new WebScanner(this.hopCount, this.query, sharedColl.jobQueue,
+					sharedColl.getKeywords(), sharedColl));
 		}
+
+		// brisi----------------------------------------------------
+		try {
+			Map<String, Integer> numbers = result.get();
+
+			System.out.println(numbers);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		// ---------------------------------------------------------
 
 		return result;
 	}

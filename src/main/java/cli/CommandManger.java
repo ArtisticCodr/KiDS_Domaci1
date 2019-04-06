@@ -25,7 +25,7 @@ public class CommandManger {
 			line = line.substring(3);
 
 			// ubacuje novi job u JobQueue
-			Job job = new Job(ScanType.WEB, line, sharedColl);
+			Job job = new Job(ScanType.WEB, line, sharedColl, sharedColl.getHop_count());
 			sharedColl.jobQueue.put(job);
 
 		} catch (Exception e) {
