@@ -1,10 +1,15 @@
 package file_scanner;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Stack;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
@@ -18,20 +23,18 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	private boolean managed;
 	private Stack<File> files;
 	private Stack<Stack<File>> work;
-	private String[] keywords;
+	private ArrayList<String> keywords;
 
 	public FileScanner(String directoyPath, long limit, String[] keywords) {
 		this.directoyPath = directoyPath;
 		this.limit = limit;
-		this.keywords = keywords;
+		this.keywords = new ArrayList<String>(Arrays.asList(keywords));
 		this.managed = false;
 	}
 
-	public FileScanner(Stack<Stack<File>> work, long limit, String[] keywords) {
+	public FileScanner(Stack<Stack<File>> work, ArrayList<String> keywords) {
 		this.work = work;
-		this.limit = limit;
 		this.keywords = keywords;
-
 		this.managed = true;
 	}
 
@@ -47,19 +50,54 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 
 		if (work.size() == 1) {
 			Stack<File> myWork = work.pop();
-			// stavljamo u toReturn rezultat obrade
+			toReturn = countKeywords(myWork);
 		} else {
-			// slitujemo work na 2 dela
-			
-			ForkJoinTask<Map<String, Integer>> forkTask = new FileScanner(work, limit, keywords);
+			// splitujemo work na 2 dela
+			Stack<Stack<File>> newWork1 = new Stack<Stack<File>>();
+			Stack<Stack<File>> newWork2 = new Stack<Stack<File>>();
+			int mid = work.size() / 2;
+			for (int i = 0; i < work.size(); i++) {
+				if (i < mid) {
+					newWork1.push(work.pop());
+				} else {
+					newWork2.push(work.pop());
+				}
+			}
 
+			ForkJoinTask<Map<String, Integer>> forkTask = new FileScanner(newWork1, keywords);
+			FileScanner callTask = new FileScanner(newWork2, keywords);
+
+			forkTask.fork();
+			Map<String, Integer> forkResult = callTask.compute();
+			Map<String, Integer> callResult = forkTask.join();
+
+			toReturn = merge(forkResult, callResult);
 		}
 
 		return toReturn;
 	}
 
-	private int count(String word, File file) {
-		return 0;
+	private Map<String, Integer> countKeywords(List<File> files) {
+		Map<String, Integer> returnMap = new HashMap<String, Integer>();
+		for (String key : keywords) {
+			returnMap.put(key, 0);
+		}
+		for (File file : files) {
+			try (Scanner sc = new Scanner(new FileInputStream(file))) {
+				String word = new String();
+				while (sc.hasNext()) {
+					word = sc.next();
+					if (keywords.contains(word)) {
+						returnMap.put(word, returnMap.get(word) + 1);
+					}
+				}
+				sc.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return returnMap;
 	}
 
 	// izvlacimo sve fajlove iz dir i sortiramo ih u stack po velicini
@@ -103,6 +141,23 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 			sum += f.length();
 		}
 		return sum;
+	}
+
+	private Map<String, Integer> merge(Map<String, Integer> m1, Map<String, Integer> m2) {
+		Map<String, Integer> returnMap = new HashMap<String, Integer>();
+
+		returnMap.putAll(m1);
+
+		for (String key : m2.keySet()) {
+			if (returnMap.containsKey(key)) {
+				Integer x = returnMap.get(key) + m2.get(key);
+				returnMap.put(key, x);
+			} else {
+				returnMap.put(key, m2.get(key));
+			}
+		}
+
+		return returnMap;
 	}
 
 }
