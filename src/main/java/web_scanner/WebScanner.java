@@ -36,6 +36,8 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 			// stavljas result u result retriever
 			return null;
 		}
+		
+		
 
 		return null;
 	}
