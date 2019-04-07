@@ -24,7 +24,7 @@ public class JobDispatcher implements Runnable {
 			try {
 				Job job = jobQueue.take();
 				if (job.getType().equals(ScanType.FILE)) {
-					sharedColl.submitToFileScannerPool(new FileScanner(job));
+					sharedColl.submitToFileScannerPool(new FileScanner(job, sharedColl));
 
 				} else {
 					sharedColl.submitToWebScannerService(new WebScanner(job));

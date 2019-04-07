@@ -1,5 +1,7 @@
 package cli;
 
+import java.util.Map;
+
 import job.Job;
 import job.ScanType;
 
@@ -37,6 +39,8 @@ public class CommandManger {
 	public void get(String line) {
 		try {
 			line = line.substring(4);
+			Map<String, Integer> result = sharedColl.resultRetriever.getResult(line);
+			System.out.println(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

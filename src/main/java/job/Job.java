@@ -1,10 +1,9 @@
 package job;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import cli.SharedObjCollection;
 import file_scanner.FileScanner;
@@ -16,6 +15,7 @@ public class Job implements ScanningJob {
 	private String query;
 	private SharedObjCollection sharedColl;
 	private int hopCount;
+	private final Lock lock = new ReentrantLock();
 
 	public Job(ScanType scanType, String query, SharedObjCollection sharedColl) {
 		super();
@@ -34,12 +34,18 @@ public class Job implements ScanningJob {
 
 	@Override
 	public ScanType getType() {
-		return this.scanType;
+		lock.lock();
+		ScanType value = this.scanType;
+		lock.unlock();
+		return value;
 	}
 
 	@Override
 	public String getQuery() {
-		return this.query;
+		lock.lock();
+		String value = this.query;
+		lock.unlock();
+		return value;
 	}
 
 	@Override
@@ -53,16 +59,6 @@ public class Job implements ScanningJob {
 			result = sharedColl.submitToWebScannerService(new WebScanner(this.hopCount, this.query, sharedColl.jobQueue,
 					sharedColl.getKeywords(), sharedColl));
 		}
-
-		// brisi----------------------------------------------------
-		try {
-			Map<String, Integer> numbers = result.get();
-
-			System.out.println(numbers);
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		// ---------------------------------------------------------
 
 		return result;
 	}

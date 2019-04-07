@@ -13,6 +13,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
 
+import cli.SharedObjCollection;
 import job.Job;
 import threadSafeObj.ThreadSafeList;
 
@@ -28,10 +29,12 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	private ThreadSafeList<String> keywords;
 
 	private Job job = null;
+	private SharedObjCollection sharedColl;
 
 	// konstruktor za inicializacuju Job-a
-	public FileScanner(Job job) {
+	public FileScanner(Job job, SharedObjCollection sharedColl) {
 		this.job = job;
+		this.sharedColl = sharedColl;
 	}
 
 	// konstructor za podelu posla
@@ -53,8 +56,11 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	protected Map<String, Integer> compute() {
 		if (job != null) {
 			Future<Map<String, Integer>> result = job.initiate();
+			String[] path = job.getQuery().split("/");
+			String name = path[path.length - 1];
 
 			// stavljas result u result retriever
+			sharedColl.resultRetriever.addCorpusResult(name, result);
 			return null;
 		}
 
