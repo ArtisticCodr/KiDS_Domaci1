@@ -16,6 +16,7 @@ import javax.naming.directory.DirContext;
 
 import file_scanner.FileScanner;
 import job.Job;
+import threadSafeObj.Connector;
 import threadSafeObj.ThreadSafeList;
 import web_scanner.WebScanner;
 
@@ -52,6 +53,7 @@ public class SharedObjCollection {
 	private ExecutorService webScannerPool = Executors.newCachedThreadPool();
 	private CompletionService<Map<String, Integer>> webScannerService = new ExecutorCompletionService<>(webScannerPool);
 	public ThreadSafeList<String> scanedUrls = new ThreadSafeList<String>();
+	public Connector connector = new Connector();
 
 	public void shutdownPools() {
 		lock.lock();

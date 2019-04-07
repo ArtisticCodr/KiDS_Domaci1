@@ -14,6 +14,7 @@ public class CommandManger {
 	public void ad(String line) {
 		try {
 			line = line.substring(3);
+			System.out.println("Adding dir " + line);
 			sharedColl.directoriesList.add(line);
 		} catch (Exception e) {
 			e.printStackTrace();

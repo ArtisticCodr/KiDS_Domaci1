@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import directory_crawler.DirectoryCrawler;
 import job_dispatcher.JobDispatcher;
+import web_scanner.UrlCleaner;
 
 public class Main {
 
@@ -27,6 +28,7 @@ public class Main {
 		// starting threads
 		new Thread(new DirectoryCrawler(sharedColl)).start();
 		new Thread(new JobDispatcher(sharedColl)).start();
+		new Thread(new UrlCleaner(sharedColl)).start();
 
 		// scanning user commands
 		scanCommands();

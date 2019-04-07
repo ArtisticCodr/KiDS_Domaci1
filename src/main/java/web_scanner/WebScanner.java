@@ -63,22 +63,25 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 		}
 
 		toReturn = countKeywords();
+		sharedColl.scanedUrls.add(url);
 		return toReturn;
 	}
 
 	private void hop() {
 		try {
-			Document doc = Jsoup.connect(url).get();
+			Document doc = sharedColl.connector.getDocument(url);
 			Elements links = doc.select("a[href]");
 
 			for (Element link : links) {
 				String lnk = link.attr("abs:href");
-				Job job = new Job(ScanType.WEB, lnk, sharedColl, hopCount.get() - 1);
-				jobQueue.put(job);
+				if (!sharedColl.scanedUrls.contains(lnk)) {
+					Job job = new Job(ScanType.WEB, lnk, sharedColl, hopCount.get() - 1);
+					jobQueue.put(job);
+				}
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+
 		}
 	}
 
@@ -88,8 +91,7 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 			returnMap.put(keywords.get(i), 0);
 		}
 		try {
-			System.out.println("Counting " + url);
-			Document doc = Jsoup.connect(url).get();
+			Document doc = sharedColl.connector.getDocument(url);
 			String text = doc.text();
 
 			String[] words = text.split("\\s+");
@@ -98,8 +100,7 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 					returnMap.put(word, returnMap.get(word) + 1);
 				}
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 		}
 
 		return returnMap;

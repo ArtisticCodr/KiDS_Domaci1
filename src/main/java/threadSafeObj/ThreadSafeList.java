@@ -22,7 +22,6 @@ public class ThreadSafeList<E> {
 
 		try {
 			if (!lista.contains(value)) {
-				System.out.println("Adding dir " + value);
 				lista.add(value);
 			}
 		} catch (Exception e) {
@@ -91,6 +90,18 @@ public class ThreadSafeList<E> {
 		}
 
 		return size;
+	}
+
+	public void clear() {
+		lock.lock();
+
+		try {
+			lista.clear();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			lock.unlock();
+		}
 	}
 
 }
