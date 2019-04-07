@@ -17,7 +17,10 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	private ExecutorService resRetrieverPool = Executors.newCachedThreadPool();
 	public ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap = new ThreadSafeMap<>();
 	public ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap = new ThreadSafeMap<>();
-	public ThreadSafeMap<String, Future<Map<String, Integer>>> domenResultMap = new ThreadSafeMap<>();
+	public ThreadSafeMap<String, Map<String, Integer>> domenResultMap = new ThreadSafeMap<>();
+
+	public ThreadSafeMap<String, Future<Map<String, Integer>>> fileSummaryMap = new ThreadSafeMap<>();
+	public ThreadSafeMap<String, Future<Map<String, Integer>>> webSummaryMap = new ThreadSafeMap<>();
 
 	@Override
 	public Map<String, Integer> getResult(String query) {
@@ -40,10 +43,9 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	@Override
 	public void clearSummary(ScanType summarytype) {
 		if (summarytype.equals(ScanType.FILE)) {
-			corpusResultMap.clear();
+			// brisemo file summary
 		} else {
-			linkResultMap.clear();
-			domenResultMap.clear();
+			// brisemo web summary
 		}
 
 	}

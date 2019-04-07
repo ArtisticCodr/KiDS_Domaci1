@@ -2,6 +2,7 @@ package threadSafeObj;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -96,6 +97,21 @@ public class ThreadSafeMap<K, V> {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	public Set<K> keySet() {
+		lock.lock();
+		Set<K> result = null;
+
+		try {
+			result = map.keySet();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			lock.unlock();
+		}
+
+		return result;
 	}
 
 }

@@ -27,7 +27,7 @@ public class JobDispatcher implements Runnable {
 					sharedColl.submitToFileScannerPool(new FileScanner(job, sharedColl));
 
 				} else {
-					sharedColl.submitToWebScannerService(new WebScanner(job));
+					sharedColl.submitToWebScannerService(new WebScanner(job, sharedColl));
 				}
 
 			} catch (InterruptedException e) {

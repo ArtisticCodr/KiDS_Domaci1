@@ -55,9 +55,9 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	@Override
 	protected Map<String, Integer> compute() {
 		if (job != null) {
-			Future<Map<String, Integer>> result = job.initiate();
 			String[] path = job.getQuery().split("/");
 			String name = path[path.length - 1];
+			Future<Map<String, Integer>> result = job.initiate();
 
 			// stavljas result u result retriever
 			sharedColl.resultRetriever.addCorpusResult(name, result);
