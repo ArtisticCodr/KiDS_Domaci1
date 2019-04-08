@@ -39,8 +39,12 @@ public class CommandManger {
 	public void get(String line) {
 		try {
 			line = line.substring(4);
-			Map<String, Integer> result = sharedColl.resultRetriever.getResult(line);
-			System.out.println(result);
+			if (line.startsWith("file|") || line.startsWith("web|")) {
+				Map<String, Integer> result = sharedColl.resultRetriever.getResult(line);
+				System.out.println(result);
+			} else {
+				System.err.println("Nepostojeca komanda sa datim brojem argumenata");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

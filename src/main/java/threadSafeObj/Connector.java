@@ -16,7 +16,7 @@ public class Connector {
 		try {
 			doc = Jsoup.connect(url).get();
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			System.err.println("WebScanner Error at URL: " + url + "\nMessage: " + e.getMessage());
 			doc = null;
 		} finally {
 			lock.unlock();

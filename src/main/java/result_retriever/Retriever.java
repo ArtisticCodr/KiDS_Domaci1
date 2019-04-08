@@ -87,7 +87,7 @@ public class Retriever implements Callable<Map<String, Integer>> {
 			}
 			domenResultMap.put(query, resultMap);
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 		return resultMap;
 	}
