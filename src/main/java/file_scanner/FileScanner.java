@@ -126,7 +126,7 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 				}
 				sc.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			}
 		}
 

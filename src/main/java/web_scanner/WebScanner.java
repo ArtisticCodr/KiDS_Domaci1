@@ -73,6 +73,7 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 			return null;
 		}
 
+		System.out.println("Starting web scan for web|" + url);
 		Map<String, Integer> toReturn = new HashMap<String, Integer>();
 
 		if (hopCount.get() > 0) {
@@ -103,7 +104,6 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 	}
 
 	private Map<String, Integer> countKeywords() {
-		System.out.println("Starting web scan for web|" + url);
 		Map<String, Integer> returnMap = new HashMap<String, Integer>();
 		for (int i = 0; i < keywords.size(); i++) {
 			returnMap.put(keywords.get(i), 0);
