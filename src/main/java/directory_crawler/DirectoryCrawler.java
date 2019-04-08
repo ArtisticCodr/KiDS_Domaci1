@@ -42,7 +42,7 @@ public class DirectoryCrawler implements Runnable {
 			}
 
 		}
-		System.out.println("Directory crawler stopping...");
+		System.out.println("Directory crawler finished...");
 	}
 
 	private void searchDirectory(String directoryName) {

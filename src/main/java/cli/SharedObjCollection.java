@@ -228,14 +228,18 @@ public class SharedObjCollection {
 
 	private void shutdownPools() {
 		while (!activePoolCount.isEmpty()) {
-			System.out.println("Cant stop now.. active threads: " + activePoolCount.size());
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+			System.out.println("Exiting pool threads, please wait.\nActive threads: " + activePoolCount.size());
 		}
 
 		fileScannerPool.shutdown();
 		webScannerPool.shutdown();
 		resultRetriever.stop();
 
-		System.out.println("Pools stopped..");
+		System.out.println("Pools finished..");
 	}
 
 }

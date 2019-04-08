@@ -31,7 +31,7 @@ public class UrlCleaner implements Runnable {
 			}
 
 		}
-		System.out.println("UrlCleaner stopping..");
+		System.out.println("UrlCleaner finished..");
 	}
 
 }

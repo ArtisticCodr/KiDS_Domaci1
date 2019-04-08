@@ -37,7 +37,7 @@ public class JobDispatcher implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Job Dispatcher stopping..");
+		System.out.println("Job Dispatcher finished..");
 	}
 
 }
