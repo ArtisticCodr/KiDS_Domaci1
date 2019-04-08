@@ -19,8 +19,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap = new ThreadSafeMap<>();
 	public ThreadSafeMap<String, Map<String, Integer>> domenResultMap = new ThreadSafeMap<>();
 
-	public ThreadSafeMap<String, Future<Map<String, Integer>>> fileSummaryMap = new ThreadSafeMap<>();
-	public ThreadSafeMap<String, Future<Map<String, Integer>>> webSummaryMap = new ThreadSafeMap<>();
+	public Result fileSummaryResult = null;
+	public Result webSummaryResult = null;
 
 	@Override
 	public Result getResult(String query) {
@@ -49,22 +49,61 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	@Override
 	public void clearSummary(ScanType summarytype) {
 		if (summarytype.equals(ScanType.FILE)) {
-			// brisemo file summary
+			fileSummaryResult = null;
 		} else {
-			// brisemo web summary
+			webSummaryResult = null;
 		}
 
 	}
 
 	@Override
-	public Map<String, Map<String, Integer>> getSummary(ScanType summaryType) {
-		// TODO Auto-generated method stub
+	public Result getSummary(ScanType summaryType) {
+		try {
+			if (summaryType.equals(ScanType.FILE) && fileSummaryResult != null) {
+				return fileSummaryResult;
+			}
+			if (summaryType.equals(ScanType.WEB) && webSummaryResult != null) {
+				return webSummaryResult;
+			}
+
+			Future<Result> result = resRetrieverPool
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "get", summaryType));
+			if (summaryType.equals(ScanType.FILE)) {
+				fileSummaryResult = result.get();
+			} else {
+				webSummaryResult = result.get();
+			}
+			return result.get();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 		return null;
 	}
 
 	@Override
-	public Map<String, Map<String, Integer>> querySummary(ScanType summaryType) {
-		// TODO Auto-generated method stub
+	public Result querySummary(ScanType summaryType) {
+		try {
+			if (summaryType.equals(ScanType.FILE) && fileSummaryResult != null) {
+				return fileSummaryResult;
+			}
+			if (summaryType.equals(ScanType.WEB) && webSummaryResult != null) {
+				return webSummaryResult;
+			}
+
+			Future<Result> result = resRetrieverPool
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "query", summaryType));
+
+			if (result.get().message == null) {
+				if (summaryType.equals(ScanType.FILE)) {
+					fileSummaryResult = result.get();
+				} else {
+					webSummaryResult = result.get();
+				}
+			}
+			return result.get();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 		return null;
 	}
 

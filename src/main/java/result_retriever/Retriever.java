@@ -33,6 +33,7 @@ public class Retriever implements Callable<Result> {
 	private ThreadSafeMap<String, Map<String, Integer>> domenResultMap = null;
 	private String query = null;
 	private String answearType;
+	private volatile boolean isSummary = false;
 
 	// konstruktor za reagovanje na upit sa strane CLI
 	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap,
@@ -46,6 +47,20 @@ public class Retriever implements Callable<Result> {
 	}
 
 	private Result finalResult = null;
+
+	private ScanType scanType;
+
+	// konstruktor za reagovanje na summary
+	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap,
+			ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap,
+			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String answearType, ScanType scanType) {
+		this.corpusResultMap = corpusResultMap;
+		this.linkResultMap = linkResultMap;
+		this.domenResultMap = domenResultMap;
+		this.answearType = answearType;
+		this.scanType = scanType;
+		this.isSummary = true;
+	}
 
 	@Override
 	public Result call() throws Exception {
@@ -65,41 +80,79 @@ public class Retriever implements Callable<Result> {
 			resultMap.put(resultName, result);
 			return null;
 		} else {
-			// reagujemo na upit sa strane CLI
-			if (query.startsWith("file|")) {
-				query = query.substring(5);
 
-				if (corpusResultMap.contains(query)) {
-					// AKO JE QUERY
-					if (answearType.contentEquals("query")) {
-						return getQueryFileResult();
-					}
+			if (isSummary) {
+				return procesSummary();
+			} else {
 
-					// AKO JE GET
-					finalResult = new Result(corpusResultMap.get(query).get(), null);
-					return finalResult;
+				return proces();
+			}
+		}
+
+	}
+
+	private Result procesSummary() throws Exception {
+		if (scanType.equals(ScanType.FILE)) {
+			// prolazimo kroz sve corpus-e
+			// podesavamo query
+			// proveravamo dal je result.message == null
+			// ako jeste to je dobar result i stavljamo ga u nasu mapu i s njom kreiramo
+			// result koj vracamo
+			// ako nije vracamo result sa messsage
+
+			Map<String, Map<String, Integer>> summaryResult = new HashMap<>();
+			for (String key : corpusResultMap.keySet()) {
+				query = "file|" + key;
+				Result re = proces();
+				if (re.message != null) {
+					return new Result(null, "Summary is not ready yet");
 				}
-			} else if (query.startsWith("web|")) {
-				query = query.substring(4);
+				summaryResult.put(key, re.result);
+			}
+			return new Result(summaryResult, null, true);
 
-				// QUERY--------------------------------------------------------------------------------
+		} else if (scanType.equals(ScanType.WEB)) {
+			Map<String, Map<String, Integer>> summaryResult = new HashMap<>();
+			for (String key : linkResultMap.keySet()) {
+				String dom = getDomain(key);
+				if (dom != null) {
+					query = "web|" + dom;
+					Result re = proces();
+					if (re.message != null) {
+						return new Result(null, "Summary is not ready yet");
+					}
+					summaryResult.put(dom, re.result);
+				}
+			}
+			return new Result(summaryResult, null, true);
+		}
+
+		return new Result(null, "Could not find result for your request");
+	}
+
+	private Result proces() throws Exception {
+
+		// reagujemo na upit sa strane CLI
+		if (query.startsWith("file|")) {
+			query = query.substring(5);
+
+			if (corpusResultMap.contains(query)) {
+				// AKO JE QUERY
 				if (answearType.contentEquals("query")) {
-					if (domenResultMap.contains(query)) {
-						if (domenResultMap.get(query) == null) {
-							QueryResult qRes = queryMergeLinksToDomain();
-							if (qRes.isFinished == false) {
-								return new Result(null, "Request still in progress");
-							}
+					return getQueryFileResult();
+				}
 
-							finalResult = new Result(qRes.result, null);
-							if (finalResult.result == null) {
-								return new Result(null, "No link with domain " + query + " has been scanned");
-							}
-							return finalResult;
-						}
-						finalResult = new Result(domenResultMap.get(query), null);
-						return finalResult;
-					} else {
+				// AKO JE GET
+				finalResult = new Result(corpusResultMap.get(query).get(), null);
+				return finalResult;
+			}
+		} else if (query.startsWith("web|")) {
+			query = query.substring(4);
+
+			// QUERY--------------------------------------------------------------------------------
+			if (answearType.contentEquals("query")) {
+				if (domenResultMap.contains(query)) {
+					if (domenResultMap.get(query) == null) {
 						QueryResult qRes = queryMergeLinksToDomain();
 						if (qRes.isFinished == false) {
 							return new Result(null, "Request still in progress");
@@ -111,33 +164,46 @@ public class Retriever implements Callable<Result> {
 						}
 						return finalResult;
 					}
-				}
-				// -------------------------------------------------------------------------------------
-
-				// GET----------------------------------------------------------------------------------
-				if (domenResultMap.contains(query)) {
-					if (domenResultMap.get(query) == null) {
-						finalResult = new Result(mergeLinksToDomain(), null);
-						if (finalResult.result == null) {
-							return new Result(null, "No link with domain " + query + " has been scanned");
-						}
-						return finalResult;
-					}
 					finalResult = new Result(domenResultMap.get(query), null);
 					return finalResult;
 				} else {
+					QueryResult qRes = queryMergeLinksToDomain();
+					if (qRes.isFinished == false) {
+						return new Result(null, "Request still in progress");
+					}
+
+					finalResult = new Result(qRes.result, null);
+					if (finalResult.result == null) {
+						return new Result(null, "No link with domain " + query + " has been scanned");
+					}
+					return finalResult;
+				}
+			}
+			// -------------------------------------------------------------------------------------
+
+			// GET----------------------------------------------------------------------------------
+			if (domenResultMap.contains(query)) {
+				if (domenResultMap.get(query) == null) {
 					finalResult = new Result(mergeLinksToDomain(), null);
 					if (finalResult.result == null) {
 						return new Result(null, "No link with domain " + query + " has been scanned");
 					}
 					return finalResult;
 				}
-				// ---------------------------------------------------------------------------------------
+				finalResult = new Result(domenResultMap.get(query), null);
+				return finalResult;
+			} else {
+				finalResult = new Result(mergeLinksToDomain(), null);
+				if (finalResult.result == null) {
+					return new Result(null, "No link with domain " + query + " has been scanned");
+				}
+				return finalResult;
 			}
-
+			// ---------------------------------------------------------------------------------------
 		}
 
 		return new Result(null, "Could not find result for your request");
+
 	}
 
 	private Map<String, Integer> mergeLinksToDomain() {
@@ -158,7 +224,7 @@ public class Retriever implements Callable<Result> {
 						resultMap = merge(resultMap, linkRes);
 					}
 				} catch (Exception e) {
-					System.err.println("Small Merge Error: " + e.getMessage());
+					// System.err.println("Small Merge Error: " + e.getMessage());
 				}
 			}
 			domenResultMap.put(query, resultMap);
@@ -182,7 +248,7 @@ public class Retriever implements Callable<Result> {
 
 					if (domain.equals(query)) {
 						Future<Map<String, Integer>> res = linkResultMap.get(key);
-						if(!res.isDone()) {
+						if (!res.isDone()) {
 							return new QueryResult(false, resultMap);
 						}
 						Map<String, Integer> linkRes = res.get();

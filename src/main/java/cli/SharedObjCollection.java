@@ -26,12 +26,12 @@ public class SharedObjCollection {
 	private final Lock lock = new ReentrantLock();
 
 	// config
-	private String[] keywords = new String[0];
-	private String file_corpus_prefix = new String();
-	private long dir_crawler_sleep_time = 0;
-	private long file_scanning_size_limit = 0;
-	private int hop_count = 0;
-	private long url_refresh_time = 0;
+	final private String[] keywords;
+	final private String file_corpus_prefix;
+	final private long dir_crawler_sleep_time;
+	final private long file_scanning_size_limit;
+	final private int hop_count;
+	final private long url_refresh_time;
 
 	public SharedObjCollection(String[] keywords, String file_corpus_prefix, long dir_crawler_sleep_time,
 			long file_scanning_size_limit, int hop_count, long url_refresh_time) {

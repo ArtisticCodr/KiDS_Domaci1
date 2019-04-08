@@ -13,9 +13,9 @@ public interface ResultRetrieverScheme {
 
 	public void clearSummary(ScanType summarytype);
 
-	public Map<String, Map<String, Integer>> getSummary(ScanType summaryType);
+	public Result getSummary(ScanType summaryType);
 
-	public Map<String, Map<String, Integer>> querySummary(ScanType summaryType);
+	public Result querySummary(ScanType summaryType);
 
 	public void addCorpusResult(String corpusName, Future<Map<String, Integer>> corpusResult);
 	
