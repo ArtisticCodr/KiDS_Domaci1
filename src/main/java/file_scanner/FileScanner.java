@@ -38,22 +38,31 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	}
 
 	// konstructor za podelu posla
-	public FileScanner(String directoyPath, long limit, String[] keywords) {
+	public FileScanner(String directoyPath, long limit, String[] keywords, SharedObjCollection sharedColl) {
 		this.directoyPath = directoyPath;
 		this.limit = limit;
 		this.keywords = new ThreadSafeList<String>(Arrays.asList(keywords));
 		this.managed = false;
+		this.sharedColl = sharedColl;
 	}
 
 	// konstruktor za pokretanje posla
-	public FileScanner(Stack<Stack<File>> work, ThreadSafeList<String> keywords) {
+	public FileScanner(Stack<Stack<File>> work, ThreadSafeList<String> keywords, SharedObjCollection sharedColl) {
 		this.work = work;
 		this.keywords = keywords;
 		this.managed = true;
+		this.sharedColl = sharedColl;
 	}
 
 	@Override
 	protected Map<String, Integer> compute() {
+		sharedColl.activePoolCount.push((byte) 1);
+		Map<String, Integer> res = work();
+		sharedColl.activePoolCount.pop();
+		return res;
+	}
+
+	private Map<String, Integer> work() {
 		if (job != null) {
 			String[] path = job.getQuery().split("/");
 			String name = path[path.length - 1];
@@ -88,8 +97,8 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 				}
 			}
 
-			ForkJoinTask<Map<String, Integer>> forkTask = new FileScanner(newWork1, keywords);
-			FileScanner callTask = new FileScanner(newWork2, keywords);
+			ForkJoinTask<Map<String, Integer>> forkTask = new FileScanner(newWork1, keywords, sharedColl);
+			FileScanner callTask = new FileScanner(newWork2, keywords, sharedColl);
 
 			forkTask.fork();
 			Map<String, Integer> forkResult = callTask.compute();

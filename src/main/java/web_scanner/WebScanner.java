@@ -50,6 +50,17 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 
 	@Override
 	public Map<String, Integer> call() throws Exception {
+		sharedColl.activePoolCount.push((byte) 1);
+		Map<String, Integer> res = null;
+		try {
+			res = work();
+		} catch (Exception e) {
+		}
+		sharedColl.activePoolCount.pop();
+		return res;
+	}
+
+	private Map<String, Integer> work() throws Exception {
 		if (job != null) {
 			if (sharedColl.scanedUrls.contains(job.getQuery())) {
 				return null;

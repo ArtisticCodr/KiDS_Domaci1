@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import cli.SharedObjCollection;
 import job.ScanType;
 import threadSafeObj.ThreadSafeMap;
 
@@ -22,12 +23,18 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public Result fileSummaryResult = null;
 	public Result webSummaryResult = null;
 
+	private SharedObjCollection sharedColl;
+
+	public ResultRetriever(SharedObjCollection sharedColl) {
+		this.sharedColl = sharedColl;
+	}
+
 	@Override
 	public Result getResult(String query) {
 		lock.lock();
 		try {
 			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "get"));
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "get", sharedColl));
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -42,7 +49,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 		lock.lock();
 		try {
 			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "query"));
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "query", sharedColl));
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -75,7 +82,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 			}
 
 			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "get", summaryType));
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "get", summaryType, sharedColl));
 			if (summaryType.equals(ScanType.FILE)) {
 				fileSummaryResult = result.get();
 			} else {
@@ -102,7 +109,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 			}
 
 			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "query", summaryType));
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "query", summaryType, sharedColl));
 
 			if (result.get().message == null) {
 				if (summaryType.equals(ScanType.FILE)) {
@@ -125,7 +132,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 		lock.lock();
 		try {
 			resRetrieverPool
-					.submit(new Retriever(corpusResultMap, corpusName, corpusResult, ScanType.FILE, domenResultMap));
+					.submit(new Retriever(corpusResultMap, corpusName, corpusResult, ScanType.FILE, domenResultMap, sharedColl));
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		} finally {
@@ -138,7 +145,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public void addlinkResult(String linkName, Future<Map<String, Integer>> linkResult) {
 		lock.lock();
 		try {
-			resRetrieverPool.submit(new Retriever(linkResultMap, linkName, linkResult, ScanType.WEB, domenResultMap));
+			resRetrieverPool.submit(new Retriever(linkResultMap, linkName, linkResult, ScanType.WEB, domenResultMap, sharedColl));
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		} finally {

@@ -4,7 +4,7 @@ import java.util.Stack;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ThreadSafeStack<E> {
+public class ThreadSafePoolStack<E> {
 	private final Stack<E> lista = new Stack<E>();;
 	private final Lock lock = new ReentrantLock();
 
@@ -12,9 +12,7 @@ public class ThreadSafeStack<E> {
 		lock.lock();
 
 		try {
-			if (!lista.contains(value)) {
-				lista.push(value);
-			}
+			lista.push(value);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -31,7 +29,7 @@ public class ThreadSafeStack<E> {
 			retVal = lista.pop();
 
 		} catch (Exception e) {
-			System.err.println("ThreadSafeStack: Nemoguce je pristupiti objektu");
+			System.err.println(e.getMessage());
 		} finally {
 			lock.unlock();
 		}

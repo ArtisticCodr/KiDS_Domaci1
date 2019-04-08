@@ -7,10 +7,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import cli.SharedObjCollection;
 import job.ScanType;
 import threadSafeObj.ThreadSafeMap;
 
 public class Retriever implements Callable<Result> {
+	private SharedObjCollection sharedColl;
 
 	private ThreadSafeMap<String, Future<Map<String, Integer>>> resultMap = null;
 	private String resultName;
@@ -20,12 +22,13 @@ public class Retriever implements Callable<Result> {
 	// konstruktor za ubacivanje prosledjenih rezultata u odgovarajucu mapu
 	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> resultMap, String resultName,
 			Future<Map<String, Integer>> result, ScanType type,
-			ThreadSafeMap<String, Map<String, Integer>> domenResultMap) {
+			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, SharedObjCollection sharedColl) {
 		this.resultMap = resultMap;
 		this.resultName = resultName;
 		this.result = result;
 		this.type = type;
 		this.domenResultMap = domenResultMap;
+		this.sharedColl = sharedColl;
 	}
 
 	private ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap = null;
@@ -38,12 +41,14 @@ public class Retriever implements Callable<Result> {
 	// konstruktor za reagovanje na upit sa strane CLI
 	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap,
 			ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap,
-			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String query, String answearType) {
+			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String query, String answearType,
+			SharedObjCollection sharedColl) {
 		this.corpusResultMap = corpusResultMap;
 		this.linkResultMap = linkResultMap;
 		this.domenResultMap = domenResultMap;
 		this.query = query;
 		this.answearType = answearType;
+		this.sharedColl = sharedColl;
 	}
 
 	private Result finalResult = null;
@@ -53,17 +58,30 @@ public class Retriever implements Callable<Result> {
 	// konstruktor za reagovanje na summary
 	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap,
 			ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap,
-			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String answearType, ScanType scanType) {
+			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String answearType, ScanType scanType,
+			SharedObjCollection sharedColl) {
 		this.corpusResultMap = corpusResultMap;
 		this.linkResultMap = linkResultMap;
 		this.domenResultMap = domenResultMap;
 		this.answearType = answearType;
 		this.scanType = scanType;
 		this.isSummary = true;
+		this.sharedColl = sharedColl;
 	}
 
 	@Override
 	public Result call() throws Exception {
+		sharedColl.activePoolCount.push((byte) 1);
+		Result res = null;
+		try {
+			res = work();
+		} catch (Exception e) {
+		}
+		sharedColl.activePoolCount.pop();
+		return res;
+	}
+
+	private Result work() throws Exception {
 		if (resultMap != null) {
 			// proveravamo dal je web rezultat.. ako jest onda gledamo dal imamo domen
 			// kesiran.. ako imamo brisemo kes za taj domen
@@ -88,7 +106,6 @@ public class Retriever implements Callable<Result> {
 				return proces();
 			}
 		}
-
 	}
 
 	private Result procesSummary() throws Exception {

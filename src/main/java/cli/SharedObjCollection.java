@@ -20,9 +20,13 @@ import job.Job;
 import result_retriever.ResultRetriever;
 import threadSafeObj.Connector;
 import threadSafeObj.ThreadSafeList;
+import threadSafeObj.ThreadSafePoolStack;
+import threadSafeObj.ThreadSafeStack;
 import web_scanner.WebScanner;
 
 public class SharedObjCollection {
+
+	public ThreadSafePoolStack<Byte> activePoolCount = new ThreadSafePoolStack<Byte>();
 
 	private final Lock lock = new ReentrantLock();
 
@@ -46,6 +50,8 @@ public class SharedObjCollection {
 		this.file_scanning_size_limit = file_scanning_size_limit;
 		this.hop_count = hop_count;
 		this.url_refresh_time = url_refresh_time;
+
+		resultRetriever = new ResultRetriever(this);
 	}
 
 	// shared obj
@@ -61,7 +67,7 @@ public class SharedObjCollection {
 	public Connector connector = new Connector();
 
 	// ResultRetriever
-	public ResultRetriever resultRetriever = new ResultRetriever();
+	public ResultRetriever resultRetriever;
 
 	public Future<Map<String, Integer>> submitToFileScannerPool(FileScanner fileScanner) {
 		lock.lock();
@@ -211,15 +217,25 @@ public class SharedObjCollection {
 			stop = true;
 			Job poisonJob = new Job(true);
 			jobQueue.put(poisonJob);
-
-			fileScannerPool.shutdown();
-			webScannerPool.shutdown();
-			resultRetriever.stop();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			stopLock.unlock();
 		}
+
+		shutdownPools();
+	}
+
+	private void shutdownPools() {
+		while (!activePoolCount.isEmpty()) {
+			System.out.println("Cant stop now.. active threads: " + activePoolCount.size());
+		}
+
+		fileScannerPool.shutdown();
+		webScannerPool.shutdown();
+		resultRetriever.stop();
+
+		System.out.println("Pools stopped..");
 	}
 
 }

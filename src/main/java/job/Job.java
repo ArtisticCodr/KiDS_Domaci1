@@ -65,8 +65,8 @@ public class Job implements ScanningJob {
 		Future<Map<String, Integer>> result;
 
 		if (this.scanType.equals(ScanType.FILE)) {
-			result = sharedColl.submitToFileScannerPool(
-					new FileScanner(this.query, sharedColl.getFile_scanning_size_limit(), sharedColl.getKeywords()));
+			result = sharedColl.submitToFileScannerPool(new FileScanner(this.query,
+					sharedColl.getFile_scanning_size_limit(), sharedColl.getKeywords(), sharedColl));
 		} else {
 			result = sharedColl.submitToWebScannerService(new WebScanner(this.hopCount, this.query, sharedColl.jobQueue,
 					sharedColl.getKeywords(), sharedColl));
