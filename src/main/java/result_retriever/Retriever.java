@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import job.ScanType;
 import threadSafeObj.ThreadSafeMap;
 
 public class Retriever implements Callable<Result> {
@@ -13,13 +14,17 @@ public class Retriever implements Callable<Result> {
 	private ThreadSafeMap<String, Future<Map<String, Integer>>> resultMap = null;
 	private String resultName;
 	private Future<Map<String, Integer>> result;
+	private ScanType type;
 
 	// konstruktor za ubacivanje prosledjenih rezultata u odgovarajucu mapu
 	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> resultMap, String resultName,
-			Future<Map<String, Integer>> result) {
+			Future<Map<String, Integer>> result, ScanType type,
+			ThreadSafeMap<String, Map<String, Integer>> domenResultMap) {
 		this.resultMap = resultMap;
 		this.resultName = resultName;
 		this.result = result;
+		this.type = type;
+		this.domenResultMap = domenResultMap;
 	}
 
 	public ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap = null;
@@ -42,6 +47,17 @@ public class Retriever implements Callable<Result> {
 	@Override
 	public Result call() throws Exception {
 		if (resultMap != null) {
+			// proveravamo dal je web rezultat.. ako jest onda gledamo dal imamo domen
+			// kesiran.. ako imamo brisemo kes za taj domen
+			if (type.equals(ScanType.WEB)) {
+				String domain = getDomain(resultName);
+				if (domain != null) {
+					if (domenResultMap.contains(domain)) {
+						domenResultMap.remove(domain);
+					}
+				}
+			}
+
 			// ubacujemo prosledjeni rezultat u odgovarajucu mapu
 			resultMap.put(resultName, result);
 			return null;
@@ -106,6 +122,21 @@ public class Retriever implements Callable<Result> {
 			System.err.println("Big Merge Error: " + e.getMessage());
 		}
 		return resultMap;
+	}
+
+	private String getDomain(String link) {
+		String domain = null;
+		try {
+			URL aURL = new URL(link);
+			domain = aURL.getHost();
+			if (domain.startsWith("www.")) {
+				domain = domain.substring(4);
+			}
+		} catch (Exception e) {
+			return null;
+		}
+
+		return domain;
 	}
 
 	private Map<String, Integer> initMap(Map<String, Integer> map) {

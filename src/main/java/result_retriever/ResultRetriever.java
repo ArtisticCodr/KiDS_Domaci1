@@ -66,7 +66,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public void addCorpusResult(String corpusName, Future<Map<String, Integer>> corpusResult) {
 		lock.lock();
 		try {
-			resRetrieverPool.submit(new Retriever(corpusResultMap, corpusName, corpusResult));
+			resRetrieverPool
+					.submit(new Retriever(corpusResultMap, corpusName, corpusResult, ScanType.FILE, domenResultMap));
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		} finally {
@@ -79,7 +80,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public void addlinkResult(String linkName, Future<Map<String, Integer>> linkResult) {
 		lock.lock();
 		try {
-			resRetrieverPool.submit(new Retriever(linkResultMap, linkName, linkResult));
+			resRetrieverPool.submit(new Retriever(linkResultMap, linkName, linkResult, ScanType.WEB, domenResultMap));
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		} finally {
