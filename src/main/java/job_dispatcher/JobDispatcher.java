@@ -20,9 +20,12 @@ public class JobDispatcher implements Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (sharedColl.isStoped() == false) {
 			try {
 				Job job = jobQueue.take();
+				if (job.isPoinson()) {
+					break;
+				}
 				if (job.getType().equals(ScanType.FILE)) {
 					sharedColl.submitToFileScannerPool(new FileScanner(job, sharedColl));
 
@@ -34,7 +37,7 @@ public class JobDispatcher implements Runnable {
 				e.printStackTrace();
 			}
 		}
-
+		System.out.println("Job Dispatcher stopping..");
 	}
 
 }

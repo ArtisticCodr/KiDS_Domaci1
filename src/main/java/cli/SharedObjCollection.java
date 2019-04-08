@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,6 +33,10 @@ public class SharedObjCollection {
 	final private long file_scanning_size_limit;
 	final private int hop_count;
 	final private long url_refresh_time;
+
+	// stop
+	private final Lock stopLock = new ReentrantLock();
+	private boolean stop = false;
 
 	public SharedObjCollection(String[] keywords, String file_corpus_prefix, long dir_crawler_sleep_time,
 			long file_scanning_size_limit, int hop_count, long url_refresh_time) {
@@ -57,13 +62,6 @@ public class SharedObjCollection {
 
 	// ResultRetriever
 	public ResultRetriever resultRetriever = new ResultRetriever();
-
-	public void shutdownPools() {
-		lock.lock();
-		fileScannerPool.shutdown();
-		webScannerPool.shutdown();
-		lock.unlock();
-	}
 
 	public Future<Map<String, Integer>> submitToFileScannerPool(FileScanner fileScanner) {
 		lock.lock();
@@ -189,6 +187,39 @@ public class SharedObjCollection {
 		}
 
 		return retVal;
+	}
+
+	public boolean isStoped() {
+		stopLock.lock();
+		boolean retVal = false;
+
+		try {
+			retVal = stop;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			stopLock.unlock();
+		}
+
+		return retVal;
+	}
+
+	public void stop() {
+		stopLock.lock();
+
+		try {
+			stop = true;
+			Job poisonJob = new Job(true);
+			jobQueue.put(poisonJob);
+
+			fileScannerPool.shutdown();
+			webScannerPool.shutdown();
+			resultRetriever.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			stopLock.unlock();
+		}
 	}
 
 }

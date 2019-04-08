@@ -24,40 +24,48 @@ public class ResultRetriever implements ResultRetrieverScheme {
 
 	@Override
 	public Result getResult(String query) {
+		lock.lock();
 		try {
 			Future<Result> result = resRetrieverPool
 					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "get"));
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
+		} finally {
+			lock.unlock();
 		}
 		return null;
 	}
 
 	@Override
 	public Result queryResult(String query) {
+		lock.lock();
 		try {
 			Future<Result> result = resRetrieverPool
 					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "query"));
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
+		} finally {
+			lock.unlock();
 		}
 		return null;
 	}
 
 	@Override
 	public void clearSummary(ScanType summarytype) {
+		lock.lock();
 		if (summarytype.equals(ScanType.FILE)) {
 			fileSummaryResult = null;
 		} else {
 			webSummaryResult = null;
 		}
-
+		lock.unlock();
 	}
 
 	@Override
 	public Result getSummary(ScanType summaryType) {
+		lock.lock();
 		try {
 			if (summaryType.equals(ScanType.FILE) && fileSummaryResult != null) {
 				return fileSummaryResult;
@@ -76,12 +84,15 @@ public class ResultRetriever implements ResultRetrieverScheme {
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
+		} finally {
+			lock.unlock();
 		}
 		return null;
 	}
 
 	@Override
 	public Result querySummary(ScanType summaryType) {
+		lock.lock();
 		try {
 			if (summaryType.equals(ScanType.FILE) && fileSummaryResult != null) {
 				return fileSummaryResult;
@@ -103,6 +114,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
+		} finally {
+			lock.unlock();
 		}
 		return null;
 	}
@@ -134,4 +147,15 @@ public class ResultRetriever implements ResultRetrieverScheme {
 
 	}
 
+	public void stop() {
+		lock.lock();
+		try {
+			resRetrieverPool.shutdown();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		} finally {
+			lock.unlock();
+		}
+
+	}
 }

@@ -16,6 +16,11 @@ public class Job implements ScanningJob {
 	private SharedObjCollection sharedColl;
 	private int hopCount;
 	private final Lock lock = new ReentrantLock();
+	private boolean poison = false;
+
+	public Job(boolean poison) {
+		this.poison = poison;
+	}
 
 	public Job(ScanType scanType, String query, SharedObjCollection sharedColl) {
 		super();
@@ -30,6 +35,13 @@ public class Job implements ScanningJob {
 		this.query = query;
 		this.sharedColl = sharedColl;
 		this.hopCount = hopCount;
+	}
+
+	public boolean isPoinson() {
+		lock.lock();
+		boolean value = this.poison;
+		lock.unlock();
+		return value;
 	}
 
 	@Override

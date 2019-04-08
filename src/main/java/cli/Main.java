@@ -32,6 +32,7 @@ public class Main {
 
 		// scanning user commands
 		scanCommands();
+		System.out.println("CLI stopping..");
 	}
 
 	public static void scanCommands() {

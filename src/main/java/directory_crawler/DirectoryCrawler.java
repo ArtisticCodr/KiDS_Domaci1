@@ -28,7 +28,7 @@ public class DirectoryCrawler implements Runnable {
 	@Override
 	public void run() {
 
-		while (true) {
+		while (sharedColl.isStoped() == false) {
 
 			// prolazimo kroz sve direktoriume koje imamo zadato
 			for (int i = 0; i < directoriesList.size(); i++) {
@@ -42,7 +42,7 @@ public class DirectoryCrawler implements Runnable {
 			}
 
 		}
-
+		System.out.println("Directory crawler stopping...");
 	}
 
 	private void searchDirectory(String directoryName) {

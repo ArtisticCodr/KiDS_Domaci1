@@ -104,6 +104,6 @@ public class CommandManger {
 	}
 
 	public void stop() {
-
+		sharedColl.stop();
 	}
 }
