@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import job.ScanType;
@@ -27,19 +28,21 @@ public class Retriever implements Callable<Result> {
 		this.domenResultMap = domenResultMap;
 	}
 
-	public ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap = null;
-	public ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap = null;
-	public ThreadSafeMap<String, Map<String, Integer>> domenResultMap = null;
-	public String query = null;
+	private ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap = null;
+	private ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap = null;
+	private ThreadSafeMap<String, Map<String, Integer>> domenResultMap = null;
+	private String query = null;
+	private String answearType;
 
 	// konstruktor za reagovanje na upit sa strane CLI
 	public Retriever(ThreadSafeMap<String, Future<Map<String, Integer>>> corpusResultMap,
 			ThreadSafeMap<String, Future<Map<String, Integer>>> linkResultMap,
-			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String query) {
+			ThreadSafeMap<String, Map<String, Integer>> domenResultMap, String query, String answearType) {
 		this.corpusResultMap = corpusResultMap;
 		this.linkResultMap = linkResultMap;
 		this.domenResultMap = domenResultMap;
 		this.query = query;
+		this.answearType = answearType;
 	}
 
 	private Result finalResult = null;
@@ -67,11 +70,51 @@ public class Retriever implements Callable<Result> {
 				query = query.substring(5);
 
 				if (corpusResultMap.contains(query)) {
+					// AKO JE QUERY
+					if (answearType.contentEquals("query")) {
+						return getQueryFileResult();
+					}
+
+					// AKO JE GET
 					finalResult = new Result(corpusResultMap.get(query).get(), null);
 					return finalResult;
 				}
 			} else if (query.startsWith("web|")) {
 				query = query.substring(4);
+
+				// QUERY--------------------------------------------------------------------------------
+				if (answearType.contentEquals("query")) {
+					if (domenResultMap.contains(query)) {
+						if (domenResultMap.get(query) == null) {
+							QueryResult qRes = queryMergeLinksToDomain();
+							if (qRes.isFinished == false) {
+								return new Result(null, "Request still in progress");
+							}
+
+							finalResult = new Result(qRes.result, null);
+							if (finalResult.result == null) {
+								return new Result(null, "No link with domain " + query + " has been scanned");
+							}
+							return finalResult;
+						}
+						finalResult = new Result(domenResultMap.get(query), null);
+						return finalResult;
+					} else {
+						QueryResult qRes = queryMergeLinksToDomain();
+						if (qRes.isFinished == false) {
+							return new Result(null, "Request still in progress");
+						}
+
+						finalResult = new Result(qRes.result, null);
+						if (finalResult.result == null) {
+							return new Result(null, "No link with domain " + query + " has been scanned");
+						}
+						return finalResult;
+					}
+				}
+				// -------------------------------------------------------------------------------------
+
+				// GET----------------------------------------------------------------------------------
 				if (domenResultMap.contains(query)) {
 					if (domenResultMap.get(query) == null) {
 						finalResult = new Result(mergeLinksToDomain(), null);
@@ -89,6 +132,7 @@ public class Retriever implements Callable<Result> {
 					}
 					return finalResult;
 				}
+				// ---------------------------------------------------------------------------------------
 			}
 
 		}
@@ -124,6 +168,38 @@ public class Retriever implements Callable<Result> {
 		return resultMap;
 	}
 
+	private QueryResult queryMergeLinksToDomain() {
+		Map<String, Integer> resultMap = null;
+
+		try {
+			for (String key : linkResultMap.keySet()) {
+				try {
+					URL aURL = new URL(key);
+					String domain = aURL.getHost();
+					if (domain.startsWith("www.")) {
+						domain = domain.substring(4);
+					}
+
+					if (domain.equals(query)) {
+						Future<Map<String, Integer>> res = linkResultMap.get(key);
+						if(!res.isDone()) {
+							return new QueryResult(false, resultMap);
+						}
+						Map<String, Integer> linkRes = res.get();
+						resultMap = initMap(resultMap);
+						resultMap = merge(resultMap, linkRes);
+					}
+				} catch (Exception e) {
+					System.err.println("Small Merge Error: " + e.getMessage());
+				}
+			}
+			domenResultMap.put(query, resultMap);
+		} catch (Exception e) {
+			System.err.println("Big Merge Error: " + e.getMessage());
+		}
+		return new QueryResult(true, resultMap);
+	}
+
 	private String getDomain(String link) {
 		String domain = null;
 		try {
@@ -155,13 +231,30 @@ public class Retriever implements Callable<Result> {
 		for (String key : m2.keySet()) {
 			if (returnMap.containsKey(key)) {
 				Integer x = returnMap.get(key) + m2.get(key);
-				returnMap.put(key, x);
+				returnMap.replace(key, x);
 			} else {
 				returnMap.put(key, m2.get(key));
 			}
 		}
 
 		return returnMap;
+	}
+
+	private Result getQueryFileResult() {
+		try {
+			if (corpusResultMap.contains(query)) {
+				Future<Map<String, Integer>> res = corpusResultMap.get(query);
+				if (res.isDone()) {
+					return new Result(res.get(), null);
+				} else {
+					return new Result(null, "Request still in progress");
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new Result(null, "Could not find result for your request.. Request work not in progress");
 	}
 
 }

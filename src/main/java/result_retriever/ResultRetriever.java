@@ -26,7 +26,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public Result getResult(String query) {
 		try {
 			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query));
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "get"));
 			return result.get();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -36,7 +36,13 @@ public class ResultRetriever implements ResultRetrieverScheme {
 
 	@Override
 	public Result queryResult(String query) {
-		// TODO Auto-generated method stub
+		try {
+			Future<Result> result = resRetrieverPool
+					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query, "query"));
+			return result.get();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 		return null;
 	}
 

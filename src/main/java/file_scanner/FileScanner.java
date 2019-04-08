@@ -175,7 +175,7 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 		for (String key : m2.keySet()) {
 			if (returnMap.containsKey(key)) {
 				Integer x = returnMap.get(key) + m2.get(key);
-				returnMap.put(key, x);
+				returnMap.replace(key, x);
 			} else {
 				returnMap.put(key, m2.get(key));
 			}
