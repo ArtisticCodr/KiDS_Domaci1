@@ -4,6 +4,7 @@ import java.util.Map;
 
 import job.Job;
 import job.ScanType;
+import result_retriever.Result;
 
 public class CommandManger {
 
@@ -40,7 +41,7 @@ public class CommandManger {
 		try {
 			line = line.substring(4);
 			if (line.startsWith("file|") || line.startsWith("web|")) {
-				Map<String, Integer> result = sharedColl.resultRetriever.getResult(line);
+				Result result = sharedColl.resultRetriever.getResult(line);
 				System.out.println(result);
 			} else {
 				System.err.println("Nepostojeca komanda sa datim brojem argumenata");

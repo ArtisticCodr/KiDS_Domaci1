@@ -7,9 +7,9 @@ import job.ScanType;
 
 public interface ResultRetrieverScheme {
 
-	public Map<String, Integer> getResult(String query);
+	public Result getResult(String query);
 
-	public Map<String, Integer> queryResult(String query);
+	public Result queryResult(String query);
 
 	public void clearSummary(ScanType summarytype);
 

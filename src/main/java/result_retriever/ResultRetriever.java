@@ -23,9 +23,9 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public ThreadSafeMap<String, Future<Map<String, Integer>>> webSummaryMap = new ThreadSafeMap<>();
 
 	@Override
-	public Map<String, Integer> getResult(String query) {
+	public Result getResult(String query) {
 		try {
-			Future<Map<String, Integer>> result = resRetrieverPool
+			Future<Result> result = resRetrieverPool
 					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, query));
 			return result.get();
 		} catch (Exception e) {
@@ -35,7 +35,7 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	}
 
 	@Override
-	public Map<String, Integer> queryResult(String query) {
+	public Result queryResult(String query) {
 		// TODO Auto-generated method stub
 		return null;
 	}

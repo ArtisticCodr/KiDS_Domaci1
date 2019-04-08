@@ -51,6 +51,9 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 	@Override
 	public Map<String, Integer> call() throws Exception {
 		if (job != null) {
+			if (sharedColl.scanedUrls.contains(job.getQuery())) {
+				return null;
+			}
 			String name = job.getQuery();
 			Future<Map<String, Integer>> result = job.initiate();
 
@@ -105,6 +108,7 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 				}
 			}
 		} catch (Exception e) {
+
 		}
 
 		return returnMap;

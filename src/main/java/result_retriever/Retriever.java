@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 
 import threadSafeObj.ThreadSafeMap;
 
-public class Retriever implements Callable<Map<String, Integer>> {
+public class Retriever implements Callable<Result> {
 
 	private ThreadSafeMap<String, Future<Map<String, Integer>>> resultMap = null;
 	private String resultName;
@@ -37,9 +37,10 @@ public class Retriever implements Callable<Map<String, Integer>> {
 		this.query = query;
 	}
 
-	@Override
-	public Map<String, Integer> call() throws Exception {
+	private Result finalResult = null;
 
+	@Override
+	public Result call() throws Exception {
 		if (resultMap != null) {
 			// ubacujemo prosledjeni rezultat u odgovarajucu mapu
 			resultMap.put(resultName, result);
@@ -50,46 +51,69 @@ public class Retriever implements Callable<Map<String, Integer>> {
 				query = query.substring(5);
 
 				if (corpusResultMap.contains(query)) {
-					return corpusResultMap.get(query).get();
+					finalResult = new Result(corpusResultMap.get(query).get(), null);
+					return finalResult;
 				}
 			} else if (query.startsWith("web|")) {
 				query = query.substring(4);
 				if (domenResultMap.contains(query)) {
 					if (domenResultMap.get(query) == null) {
-						return mergeLinksToDomain();
+						finalResult = new Result(mergeLinksToDomain(), null);
+						if (finalResult.result == null) {
+							return new Result(null, "No link with domain " + query + " has been scanned");
+						}
+						return finalResult;
 					}
-					return domenResultMap.get(query);
+					finalResult = new Result(domenResultMap.get(query), null);
+					return finalResult;
 				} else {
-					Map<String, Integer> resultMap = mergeLinksToDomain();
-					return resultMap;
+					finalResult = new Result(mergeLinksToDomain(), null);
+					if (finalResult.result == null) {
+						return new Result(null, "No link with domain " + query + " has been scanned");
+					}
+					return finalResult;
 				}
 			}
 
 		}
-		return null;
+
+		return new Result(null, "Could not find result for your request");
 	}
 
 	private Map<String, Integer> mergeLinksToDomain() {
-		Map<String, Integer> resultMap = new HashMap<>();
+		Map<String, Integer> resultMap = null;
 
 		try {
 			for (String key : linkResultMap.keySet()) {
-				URL aURL = new URL(key);
-				String domain = aURL.getHost();
-				if (domain.startsWith("www.")) {
-					domain = domain.substring(4);
-				}
+				try {
+					URL aURL = new URL(key);
+					String domain = aURL.getHost();
+					if (domain.startsWith("www.")) {
+						domain = domain.substring(4);
+					}
 
-				if (domain.equals(query)) {
-					Map<String, Integer> linkRes = linkResultMap.get(key).get();
-					resultMap = merge(resultMap, linkRes);
+					if (domain.equals(query)) {
+						Map<String, Integer> linkRes = linkResultMap.get(key).get();
+						resultMap = initMap(resultMap);
+						resultMap = merge(resultMap, linkRes);
+					}
+				} catch (Exception e) {
+					System.err.println("Small Merge Error: " + e.getMessage());
 				}
 			}
 			domenResultMap.put(query, resultMap);
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			System.err.println("Big Merge Error: " + e.getMessage());
 		}
 		return resultMap;
+	}
+
+	private Map<String, Integer> initMap(Map<String, Integer> map) {
+		if (map == null) {
+			return new HashMap<>();
+		}
+
+		return map;
 	}
 
 	private Map<String, Integer> merge(Map<String, Integer> m1, Map<String, Integer> m2) {
