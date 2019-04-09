@@ -57,7 +57,9 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 	@Override
 	protected Map<String, Integer> compute() {
 		sharedColl.activePoolCount.push((byte) 1);
-		Map<String, Integer> res = work();
+		Map<String, Integer> res = new HashMap<String, Integer>();
+		if (sharedColl.isStoped() == false)
+			res = work();
 		sharedColl.activePoolCount.pop();
 		return res;
 	}

@@ -51,9 +51,10 @@ public class WebScanner implements Callable<Map<String, Integer>> {
 	@Override
 	public Map<String, Integer> call() throws Exception {
 		sharedColl.activePoolCount.push((byte) 1);
-		Map<String, Integer> res = null;
+		Map<String, Integer> res = new HashMap<String, Integer>();
 		try {
-			res = work();
+			if (sharedColl.isStoped() == false)
+				res = work();
 		} catch (Exception e) {
 		}
 		sharedColl.activePoolCount.pop();

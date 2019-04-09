@@ -72,9 +72,10 @@ public class Retriever implements Callable<Result> {
 	@Override
 	public Result call() throws Exception {
 		sharedColl.activePoolCount.push((byte) 1);
-		Result res = null;
+		Result res = new Result(null, "no msg");
 		try {
-			res = work();
+			if (sharedColl.isStoped() == false)
+				res = work();
 		} catch (Exception e) {
 		}
 		sharedColl.activePoolCount.pop();
