@@ -81,8 +81,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 				return webSummaryResult;
 			}
 
-			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "get", summaryType, sharedColl));
+			Future<Result> result = resRetrieverPool.submit(
+					new Retriever(corpusResultMap, linkResultMap, domenResultMap, "get", summaryType, sharedColl));
 			if (summaryType.equals(ScanType.FILE)) {
 				fileSummaryResult = result.get();
 			} else {
@@ -108,8 +108,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 				return webSummaryResult;
 			}
 
-			Future<Result> result = resRetrieverPool
-					.submit(new Retriever(corpusResultMap, linkResultMap, domenResultMap, "query", summaryType, sharedColl));
+			Future<Result> result = resRetrieverPool.submit(
+					new Retriever(corpusResultMap, linkResultMap, domenResultMap, "query", summaryType, sharedColl));
 
 			if (result.get().message == null) {
 				if (summaryType.equals(ScanType.FILE)) {
@@ -131,8 +131,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public void addCorpusResult(String corpusName, Future<Map<String, Integer>> corpusResult) {
 		lock.lock();
 		try {
-			resRetrieverPool
-					.submit(new Retriever(corpusResultMap, corpusName, corpusResult, ScanType.FILE, domenResultMap, sharedColl));
+			resRetrieverPool.submit(new Retriever(corpusResultMap, corpusName, corpusResult, ScanType.FILE,
+					domenResultMap, sharedColl));
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		} finally {
@@ -145,7 +145,8 @@ public class ResultRetriever implements ResultRetrieverScheme {
 	public void addlinkResult(String linkName, Future<Map<String, Integer>> linkResult) {
 		lock.lock();
 		try {
-			resRetrieverPool.submit(new Retriever(linkResultMap, linkName, linkResult, ScanType.WEB, domenResultMap, sharedColl));
+			resRetrieverPool.submit(
+					new Retriever(linkResultMap, linkName, linkResult, ScanType.WEB, domenResultMap, sharedColl));
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		} finally {

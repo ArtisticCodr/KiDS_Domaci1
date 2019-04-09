@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
+import javax.naming.directory.DirContext;
+
 import cli.SharedObjCollection;
 import job.Job;
 import job.ScanType;
@@ -69,16 +71,19 @@ public class DirectoryCrawler implements Runnable {
 	// direktoriumi za koje smo vec napravili Job.. key->path ; value->last_modified
 	private HashMap<String, Long> corpus_directories = new HashMap<String, Long>();
 
+	// zbog windowsa
+	private HashMap<String, Long> file_directories = new HashMap<String, Long>();
+
 	private void createJob(File dirFile) {
 
 		// proveravamo dal se promenio TimeStamp ako ga ima
 		if (corpus_directories.containsKey(dirFile.getAbsolutePath())) {
 			if (corpus_directories.get(dirFile.getAbsolutePath()) == dirFile.lastModified()) {
-				return;
+				if (isTimestampChanged(dirFile) == false)
+					return;
 			}
 		}
 
-		System.out.println("Starting file scan for file|" + dirFile.getName());
 		// napravi Job
 		Job job = new Job(ScanType.FILE, dirFile.getAbsolutePath(), sharedColl);
 		// stavi Job u queue
@@ -91,6 +96,32 @@ public class DirectoryCrawler implements Runnable {
 
 		// ubacujemo directory sa TimeStamp-om
 		corpus_directories.put(dirFile.getAbsolutePath(), dirFile.lastModified());
+		saveFileTimestamps(dirFile);
+	}
+
+	// zbog windowsa
+	private void saveFileTimestamps(File dirFile) {
+		File[] files = dirFile.listFiles();
+		if (files != null) {
+			for (File file : files) {
+				file_directories.put(file.getAbsolutePath(), file.lastModified());
+			}
+		}
+	}
+
+	// zbog windowsa
+	private boolean isTimestampChanged(File dirFile) {
+		File[] files = dirFile.listFiles();
+		if (files != null) {
+			for (File file : files) {
+				if (file_directories.get(file.getAbsolutePath()) != file.lastModified()) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		return true;
 	}
 
 }

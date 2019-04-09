@@ -68,6 +68,7 @@ public class FileScanner extends RecursiveTask<Map<String, Integer>> {
 		if (job != null) {
 			String[] path = job.getQuery().split("/");
 			String name = path[path.length - 1];
+			System.out.println("Starting file scan for file|" + name);
 			Future<Map<String, Integer>> result = job.initiate();
 
 			// stavljas result u result retriever

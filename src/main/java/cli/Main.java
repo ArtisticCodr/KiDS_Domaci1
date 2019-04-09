@@ -63,7 +63,7 @@ public class Main {
 				continue;
 			}
 			if (line.equals("cfs")) {
-				cm.cws();
+				cm.cfs();
 				continue;
 			}
 			if (line.equals("stop")) {
