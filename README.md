@@ -77,6 +77,9 @@ Command name: stop<br>
 Parameter: -<br>
 Description: Turn off the application. Stops all thread pools and tells all threads to finish properly.<br><br>
 
+# Executables
+Folowing [this](https://github.com/ArtisticCodr/KiDS_Keyword_counter/tree/master/Runnable) link you can get to the directory with the executable jar files and example of the configuration file.
+
 # Note
 This Project was written as a part of the course "Concurrent and Distributed Systems" at The Faculty Of Computer Science in Belgrade
 
