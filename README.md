@@ -20,7 +20,7 @@ While in individual threads, they execute:<br>
 ● Directory crawler<br><br>
 In addition to these active components, there is one (job queue) that is used to assign new
 jobs and starting them. <br>The system can be represented graphically as follows:<br>
-![alt text](https://raw.githubusercontent.com/ArtisticCodr/KiDS_Keyword_counter/master/img/graph.png)<br><br>
+![alt text](https://raw.githubusercontent.com/filiph-r/KiDS_Keyword_counter/master/img/graph.png)<br><br>
 
 # Configuration file
 The system is configured using the app.properties configuration file, which has the following
@@ -78,7 +78,7 @@ Parameter: -<br>
 Description: Turn off the application. Stops all thread pools and tells all threads to finish properly.<br><br>
 
 # Executables
-Folowing [this](https://github.com/ArtisticCodr/KiDS_Keyword_counter/tree/master/Runnable) link you can get to the directory with the executable jar files and example of the configuration file.
+Folowing [this](https://github.com/filiph-r/KiDS_Keyword_counter/tree/master/Runnable) link you can get to the directory with the executable jar files and example of the configuration file.
 
 # Note
 This Project was written as a part of the course "Concurrent and Distributed Systems" at The Faculty Of Computer Science in Belgrade
