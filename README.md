@@ -1,4 +1,4 @@
-# Keyword counter (concurrent and distributed systems)
+# Keyword counter
 The Keyword counter system supports counting the impressions of keywords that are upfront
 given (in the configuration file) in corps of different type. This counting is concurrent with
 the ability to add new corps as well as view the counting results for individual ones and summarizing the results. 
@@ -76,3 +76,10 @@ when specified, the Result retriever components should be reported to delete the
 Command name: stop<br>
 Parameter: -<br>
 Description: Turn off the application. Stops all thread pools and tells all threads to finish properly.<br><br>
+
+# Note
+This Project was written as a part of the course "Concurrent and Distributed Systems" at The Faculty Of Computer Science in Belgrade
+
+# Contributed
+Filip Hadzi-Ristic<br>
+filip.h-r@protonmail.com<br>
