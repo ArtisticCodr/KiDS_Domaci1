@@ -5,11 +5,11 @@ the ability to add new corps as well as view the counting results for individual
 This implementation works for ASCII encoded text files and HTML files located on the web.
 Keywords in these corpora are counted only when standing alone, not when they are part of other words,
 and the search should be case-sensitive.
-The user interacts with the system via the command line (CLI), by entering commands.
+The user interacts with the system via the command line (CLI), by entering commands. 
 
 # System description
 The system consists of three thread pool based components and several auxiliaries
-components that execute each in its own thread.<br> <br>
+components that execute each in its own thread.<br><br>
 They have their thread pool:<br>
 ● Web Scanner<br>
 ● File Scanner<br>
